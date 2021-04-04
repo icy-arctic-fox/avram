@@ -10,7 +10,7 @@ module Avram::ParamKeyOverride
   macro define_param_key_override
     macro param_key(key)
       def self.param_key
-        \{{ key.id.stringify }}
+        \{% if key %}\{{ key.id.stringify }}\{% else %}nil\{% end %}
       end
     end
   end
