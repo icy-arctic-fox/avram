@@ -2,11 +2,11 @@ class Avram::Attribute(T)
   alias ErrorMessage = String | Proc(String, String, String) | Avram::CallableErrorMessage
   getter name : Symbol
   setter value : T?
-  getter param_key : String
+  getter! param_key : String?
   @errors = [] of String
   @param : Avram::Uploadable | String | Nil
 
-  def initialize(@name, @value : T?, @param_key, @param = nil)
+  def initialize(@name, @value : T?, @param_key = nil, @param = nil)
     @original_value = @value
   end
 
@@ -74,7 +74,11 @@ class Avram::Attribute(T)
   end
 
   private def extract(params, type : Avram::Uploadable.class)
-    file = params.nested_file?(param_key)
+    file = if (param_key = @param_key)
+             params.nested_file?(param_key)
+           else
+             params
+           end
     @param = param_val = file.try(&.[]?(name.to_s))
     return if param_val.nil?
 
@@ -87,7 +91,11 @@ class Avram::Attribute(T)
   end
 
   private def extract(params, type)
-    nested_params = params.nested(param_key)
+    nested_params = if (param_key = @param_key)
+                      params.nested(param_key)
+                    else
+                      params
+                    end
     @param = param_val = nested_params[name.to_s]?
     return if param_val.nil?
 
